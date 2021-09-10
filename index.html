@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Times</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    #count {
+        color: #4cd964;
+        font-size: 44px;
+    }
+    #set,#start,#upload {
+        padding: 15px;
+        font-weight: bold;
+        color: #dd524d;
+        border: solid 1px #dd524d;
+        display: none;
+        background-color: #fff;
+    }
+    #restart {
+        padding: 15px;
+        font-weight: bold;
+        color: #4cd964;
+        border: solid 1px #4cd964;
+        display: none;
+        background-color: #fff;
+    }
+    .btns {
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+    }
+    .counttime {
+        display: none;
+    }
+    .progress {
+        width: 100%;
+    }
+    .progress-bar {
+        height: 10px;
+    }
+    .progress-bar-slide {
+        animation: slide 10s linear;
+    }
+    @keyframes slide {
+        0% {
+            background-color: #007aff;
+            width: 100%;
+        }
+        25% {
+            background-color: #4cd964;
+            width: 75%;
+        }
+        50% {
+            background-color: #f0ad4e;
+
+            width: 50%;
+        }
+        75% {
+            background-color: #dd524d;
+            width: 25%;
+        }
+        100% {
+            background-color: #dd524d;
+            width: 0%;
+        }
+    }
+</style>
+<body>
+    <div class="progress">
+        <div class="progress-bar"></div>
+    </div>
+    <h1 id="count">0</h1>
+    <div class="btns">
+        <button id="set">Click!</button>
+        <button id="restart">reStart!</button>
+        <button id="upload">Upload!</button>
+    </div>
+</body>
+<script>
+    (function(){
+        var count = 0;
+        var set = document.getElementById('set');
+        var restart = document.getElementById('restart');
+        var upload = document.getElementById('upload');
+        var countTag = document.getElementById('count');
+        var progress = document.querySelector('.progress-bar');
+        set.addEventListener('click', function() {
+            if (count == 0) {
+                progress.classList.add('progress-bar-slide')
+                setTimeout(function() {
+                    endGame()
+                }, 1000*10)
+            }
+            count += 1;
+            countTag.innerHTML = count;
+        });
+
+        restart.addEventListener('click', function() {
+            init()
+        })
+
+        var init = function() {
+            set.disabled = false;
+            set.style.display = 'block';
+            restart.style.display = 'none';
+            upload.style.display = 'none';
+            progress.classList.remove('progress-bar-slide')
+            count = 0;
+            countTag.innerHTML = 0;
+        }
+        var endGame = function() {
+            console.log('end');
+            set.disabled = true;
+            set.style.display = 'none';
+            restart.style.display = 'block';
+            upload.style.display = 'block';
+        }
+        init()
+    })()
+</script>
+</html>
