@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Click Times</title>
 </head>
 <style>
-    *{user-select: none}
     body {
         margin: 0;
         height: 100vh;
@@ -15,6 +14,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        position: relative;
     }
     #count {
         color: #4cd964;
@@ -36,6 +36,18 @@
         display: none;
         background-color: #fff;
     }
+    .green {
+        font-weight: bold;
+        color: #4cd964;
+        border: solid 1px #4cd964;
+        background-color: #fff;
+    }
+    .red {
+        font-weight: bold;
+        color: #dd524d;
+        border: solid 1px #dd524d;
+        background-color: #fff;
+    }
     .btns {
         width: 100%;
         display: flex;
@@ -52,6 +64,60 @@
     }
     .progress-bar-slide {
         animation: slide 10s linear;
+    }
+    .rank {
+        position: absolute;
+        padding: 15px;
+        top: 0;
+        right: 0;
+    }
+    .upload-model {
+        position: absolute;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(2px);
+        background-color: #00000055;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: auto;
+        transition: .3s
+    }
+    .rank-model {
+        position: fixed;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(2px);
+        background-color: #00000055;
+        transition: .3s
+    }
+    .upload-model input {
+        padding: 10px;
+    }
+    .upload-model button {
+        padding: 15px;
+        margin-top: 5px;
+    }
+    .rank-item {
+        box-sizing: border-box;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 15px;
+        color: #fff;
+    }
+    .rank-model-close {
+        height: 50px;
+        width: 100%;
+        line-height: 50px;
+        color: #fff;
+        text-align: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
     }
     @keyframes slide {
         0% {
@@ -78,18 +144,28 @@
     }
 </style>
 <body>
+    <div class="rank" onclick="openRank()">排行榜！</div>
     <div class="progress">
         <div class="progress-bar"></div>
     </div>
     <h1 id="count">0</h1>
     <div class="btns">
-        <button id="set">Click!</button>
-        <button id="restart">reStart!</button>
-        <button id="upload">Upload!</button>
+        <button id="set">开始点击!</button>
+        <button id="restart">重新开始!</button>
+        <button id="upload" onclick="openUpload()">上传成绩!</button>
+    </div>
+    <div class="upload-model" style="display: none;">
+        <input type="text" placeholder="请输入名字">
+        <button class="green" onclick="uploadRank()">保存</button>
+        <button class="red" onclick="closeUpload()">关闭</button>
+    </div>
+    <div class="rank-model" style="display: none;">
+        <div class="rank-model-close" onclick="closeRank()">关闭</div>
     </div>
 </body>
 <script>
     (function(){
+        var baseUrl = 'http://139.129.117.239:3000/'
         var count = 0;
         var set = document.getElementById('set');
         var restart = document.getElementById('restart');
@@ -110,7 +186,21 @@
         restart.addEventListener('click', function() {
             init()
         })
-
+        var getRank = function() {
+            fetch(baseUrl+'getrank').then(res => res.json()).then(res => {
+                if (res.success&&res.data.length) {
+                    var arr = document.createDocumentFragment()
+                    res.data.forEach(t => {
+                        var fragment = document.createElement('p');
+                        fragment.classList.add('rank-item');
+                        fragment.innerHTML = `<span>名字：${t.name}</span><span>点击：${t.rank}</span>`;
+                        arr.appendChild(fragment)
+                    })
+                    var ranks = document.querySelector('.rank-model');
+                    ranks.appendChild(arr)
+                }
+            })
+        };
         var init = function() {
             set.disabled = false;
             set.style.display = 'block';
@@ -128,6 +218,32 @@
             upload.style.display = 'block';
         }
         init()
+        getRank()
+        window.openUpload = function() {
+            var t = document.querySelector('.upload-model')
+            t.style.display = 'flex'
+        }
+        window.uploadRank = function() {
+            // http://localhost:3000/rank?rank=123&name=023
+            var t = document.querySelector('.upload-model input')
+            fetch(`${baseUrl}rank?rank=${count}&name=${t.value}`).then(res => res.json()).then(res => {
+                if (res.success) {
+                    closeUpload()
+                }
+            })
+        }
+        window.closeUpload = function() {
+            var t = document.querySelector('.upload-model')
+            t.style.display = 'none'
+        } 
+        window.openRank = function() {
+            var t = document.querySelector('.rank-model')
+            t.style.display="block"
+        }
+        window.closeRank = function() {
+            var t = document.querySelector('.rank-model')
+            t.style.display="none"
+        }
     })()
 </script>
 </html>
